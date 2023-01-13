@@ -123,6 +123,46 @@ class RoomDetail(APIView):
             raise NotAuthenticated
         if room.owner != request.user:
             raise PermissionDenied
+        # my code
+
+        serializer = RoomDetailSerializer(
+            room,
+            data=request.data,
+            partial=True,
+        )  # RoomDetailSerializer에 room 객체를 넣는다. + request.data도 partial 조건으로 넣는다.
+
+        if serializer.is_valid():  # serializer 유효하면,,,
+            category_pk = request.data.get("category")
+            if category_pk:
+                try:
+                    category = Category.objects.get(pk=category_pk)
+                    if category.kind == Category.CategoryKindChoices.EXPERIENCES:
+                        raise ParseError("올바른 타입이 아닙니다.")
+                except Category.DoesNotExist:
+                    raise ParseError("존재하지 않는 카테고리입니다.")
+
+            try:
+                with transaction.atomic():
+                    if category_pk:
+                        room = serializer.save(category=category)
+                    else:
+                        room = serializer.save()
+
+                    amenities = request.data.get("amenities")
+                    if amenities:
+                        room.amenities.clear()
+                        for amenity_pk in amenities:
+                            amenity = Amenity.objects.get(pk=amenity_pk)
+                            room.amenities.add(amenity)
+                    else:
+                        room.amenities.clear()
+
+                    return Response(RoomDetailSerializer(room).data)
+            except Exception as e:
+                print(e)
+                raise ParseError("amenity not found")
+        else:
+            return Response(serializer.errors)
 
     def delete(self, request, pk):
         room = self.get_object(pk)
