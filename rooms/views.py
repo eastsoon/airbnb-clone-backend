@@ -200,3 +200,29 @@ class RoomReviews(APIView):
             many=True,
         )
         return Response(serializer.data)
+
+
+class RoomAmenities(APIView):
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+
+    def get(self, request, pk):
+        try:
+            page = int(request.query_params.get("page", 1))
+            page_size = int(request.query_params.get("page_size", 2))
+        except ValueError:
+            page = 1
+            page_size = 2
+        room = self.get_object(pk)
+        start = (page - 1) * page_size
+        end = start + page_size
+        serializer = AmenitySerializer(
+            room.amenities.all()[
+                start:end
+            ],  # 이부분에서 queryset이 lazing 하기때문에 즉각적으로 실행되지 않는다. 장고는 limit offset된 query 문을 만들어서 보낸다.
+            many=True,
+        )
+        return Response(serializer.data)
