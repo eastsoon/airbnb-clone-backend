@@ -29,6 +29,10 @@ class RoomDetailSerializer(ModelSerializer):
     def get_rating(self, room):
         return room.rating()
 
+    def get_is_owner(self, room):
+        request = self.context["request"]
+        return room.owner == request.user
+
     class Meta:
         model = Room
         fields = "__all__"
@@ -42,6 +46,10 @@ class RoomListSerializer(ModelSerializer):
 
     def get_rating(self, room):
         return room.rating()
+
+    def get_is_owner(self, room):
+        request = self.context["request"]
+        return room.owner == request.user
 
     class Meta:
         model = Room
