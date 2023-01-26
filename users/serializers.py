@@ -10,3 +10,18 @@ class TinyUserSerializer(ModelSerializer):
             "avatar",
             "username",
         )
+
+
+class PrivateUserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        exclude = (
+            "password",
+            "is_superuser",
+            "is_staff",
+            "is_active",
+            "first_name",
+            "last_name",
+            "groups",
+            "user_permissions",
+        )
