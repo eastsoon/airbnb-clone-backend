@@ -70,6 +70,45 @@ class TestAmenitites(APITestCase):
         data = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertIn("nameasdfasd", data)
+        self.assertIn("name", data)
 
-        print(response.json())
+
+class TestAmenity(APITestCase):
+
+    NAME = "Amenity Test"
+    DESC = "Amenity Des"
+    URL = "/api/v1/rooms/amenities/"
+
+    def setUp(self):
+        models.Amenity.objects.create(
+            name=self.NAME,
+            description=self.DESC,
+        )
+
+    def test_get_amenity(self):
+        respone = self.client.get("/api/v1/rooms/amenities/2")
+
+        self.assertEqual(respone.status_code, 404)
+
+        respone = self.client.get("/api/v1/rooms/amenities/1")
+
+        self.assertEqual(respone.status_code, 200)
+
+        data = respone.json()
+
+        self.assertEqual(
+            data["name"],
+            self.NAME,
+        )
+
+        self.assertEqual(
+            data["description"],
+            self.DESC,
+        )
+
+
+class TestRooms(APITestCase):
+    def test_creat_room(self):
+        response = self.client.post("/api/v1/rooms/")
+
+        self.assertEqual(response.status_code, 403)
