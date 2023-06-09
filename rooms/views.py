@@ -1,3 +1,4 @@
+import time
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.views import APIView
@@ -77,7 +78,6 @@ class AmenityDetail(APIView):
 
 
 class Rooms(APIView):
-
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
@@ -125,7 +125,6 @@ class Rooms(APIView):
 
 
 class RoomDetail(APIView):
-
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
@@ -135,6 +134,7 @@ class RoomDetail(APIView):
             raise NotFound
 
     def get(self, request, pk):
+        time.sleep(3)
         room = self.get_object(pk)
         serializer = RoomDetailSerializer(
             room,
@@ -200,7 +200,6 @@ class RoomDetail(APIView):
 
 
 class RoomReviews(APIView):
-
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
@@ -210,6 +209,7 @@ class RoomReviews(APIView):
             raise NotFound
 
     def get(self, request, pk):
+        time.sleep(3)
         try:
             page = int(request.query_params.get("page", 1))
             page_size = int(request.query_params.get("page_size", 5))
@@ -267,7 +267,6 @@ class RoomAmenities(APIView):
 
 
 class RoomPhotos(APIView):
-
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
@@ -298,7 +297,6 @@ class RoomPhotos(APIView):
 
 
 class RoomBookings(APIView):
-
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
