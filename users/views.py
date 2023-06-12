@@ -10,7 +10,6 @@ from . import serializers, models
 
 
 class Me(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -102,7 +101,6 @@ class LogIn(APIView):
 
 
 class LogOut(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -134,3 +132,10 @@ class JWTLogIn(APIView):
             return Response({"token": token})
         else:
             return Response({"error": "wrong password"})
+
+
+class GithubLogIn(APIView):
+    def post(self, request):
+        code = request.data.get("code")
+        print(code)
+        return Response()
