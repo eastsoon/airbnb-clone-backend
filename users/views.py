@@ -1,3 +1,4 @@
+import time
 import jwt
 import requests
 from django.conf import settings
@@ -105,6 +106,7 @@ class LogOut(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        time.sleep(3)
         logout(request)
         return Response({"ok": "bye!"})
 
@@ -175,6 +177,53 @@ class GithubLogIn(APIView):
                 user.save()
                 login(request, user)
                 return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class KakaoLogIn(APIView):
+    def post(self, request):
+        time.sleep(3)
+        try:
+            code = request.data.get("code")
+            access_token = requests.post(
+                "https://kauth.kakao.com/oauth/token",
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                data={
+                    "grant_type": "authorization_code",
+                    "client_id": "ed0047ab00386e970dd1c124810c7e4e",
+                    "redirect_uri": "http://127.0.0.1:3000/social/kakao",
+                    "code": code,
+                },
+            )
+            access_token = access_token.json().get("access_token")
+            user_data = requests.get(
+                "https://kapi.kakao.com/v2/user/me",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+                },
+            )
+
+            kakao_account = user_data.json().get("kakao_account")
+            profile = kakao_account.get("profile")
+            try:
+                user = models.User.objects.get(email=kakao_account.get("email"))
+                login(request, user)
+                return Response(status=status.HTTP_200_OK)
+            except models.User.DoesNotExist:
+                user = models.User.objects.create(
+                    email=kakao_account.get("email"),
+                    username=profile.get("nickname"),
+                    name=profile.get("nickname"),
+                    avatar=profile.get("profile_image_url"),
+                )
+                user.set_unuable_password()
+                user.save()
+                login(request, user)
+                return Response(status=status.HTTP_200_OK)
+
         except Exception as e:
             print(e)
             return Response(status=status.HTTP_400_BAD_REQUEST)
